@@ -360,13 +360,13 @@ pre {padding: 10px}
 <div id="content">
     <div class='api panel'>
         <span class='title'>错误码</span>
-        <div class="panel">
+        <div class="panel bg">
         <pre>{errcode}</pre>
         </div>
     </div>
     <div class='api panel'>
         <span class='title'>返回格式</span>
-        <div class="panel res_data">
+        <div class="panel res_data bg">
         <pre>{ret_sample_data}</pre>
         </div>
     </div>
