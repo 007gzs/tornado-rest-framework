@@ -153,6 +153,8 @@ class ApiHandler(BaseHandler):
                 if accept:
                     if 'javascript' in accept.lower():
                         _format = API_FORMAT_JSONP
+                    elif 'json' in accept.lower():
+                        _format = API_FORMAT_JSON
         else:
             _format = _format.lower()
         return _format or (API_FORMAT_PREVIEW if self.debug else API_FORMAT_JSON)
