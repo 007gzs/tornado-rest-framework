@@ -18,6 +18,10 @@ matrix:
     - env: TOX_ENV=pypy3
       python: "pypy3"
 
+services:
+  - redis-server
+  - memcached
+
 cache:
   directories:
     - $HOME/.cache/pip
