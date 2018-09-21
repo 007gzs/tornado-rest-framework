@@ -175,7 +175,7 @@ table,table tr th, table tr td { border:1px solid #000000; }
 table{background: #cccccc; min-height: 25px; line-height: 25px; text-align: center; border-collapse: collapse;}
 .raw_body {font-style: italic;}
 #content{ width: 90%; margin-left: 5%}
-#res_data{ max-width: 100%; overflow-x: scroll; }
+#res_data{ max-width: 100%; overflow-x: auto; }
 .bg { background: #cccccc; margin: 0; border-radius: 10px }
 pre {padding: 10px}
 .panel { width: 100%; margin-bottom:10px}
@@ -342,7 +342,7 @@ table,table tr th, table tr td { border:1px solid #000000; }
 table{background: #cccccc; min-height: 25px; line-height: 25px; text-align: center; border-collapse: collapse;}
 .raw_body {font-style: italic;}
 #content{ width: 90%; margin-left: 5%}
-div.res_data{ max-width: 100%; overflow-x: scroll; }
+div.res_data{ max-width: 100%; overflow-x: auto; }
 div.api {clear: both; margin-bottom:50px}
 pre {padding: 10px}
 .bg { background: #cccccc; margin: 0; border-radius: 10px }
