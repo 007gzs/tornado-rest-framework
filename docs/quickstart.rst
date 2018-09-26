@@ -1,22 +1,5 @@
-######################
-Tornado REST framework
-######################
-.. image:: https://travis-ci.org/007gzs/tornado-rest-framework.svg?branch=master
-    :target: https://travis-ci.org/007gzs/tornado-rest-framework
-.. image:: https://img.shields.io/pypi/v/tornadoapi.svg
-    :target: https://pypi.org/project/tornadoapi
-
-Tornado REST framework
-`【阅读文档】 <http://tornadoapi.readthedocs.io/zh_CN/latest/>`_。
-
-安装
----------------------
-目前 tornadoapi 支持的 Python 环境有 2.7, 3.4, 3.5, 3.6 和 pypy。::
-
-    pip install tornadoapi
-
 快速开始
-_____________________
+==========
 
 启动之前或启动脚本开始时配置环境变量::
 
@@ -55,7 +38,3 @@ ApiHandler调用示例::
                 'test_choice': self.test_choice
             }
             self.write_api(ret)
-示例项目
----------------------
-
-`demo <https://github.com/007gzs/tornadoapi-example/>`_

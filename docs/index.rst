@@ -15,6 +15,7 @@ tornado rest api
    :maxdepth: 2
 
    install
+   quickstart
 
 
 Handler
