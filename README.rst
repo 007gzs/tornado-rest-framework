@@ -6,7 +6,8 @@ Tornado REST framework
 .. image:: https://img.shields.io/pypi/v/tornadoapi.svg
     :target: https://pypi.org/project/tornadoapi
 
-
+Tornado REST framework
+`【阅读文档】 <http://tornadoapi.readthedocs.io/zh_CN/latest/>`_。
 
 安装
 ---------------------
