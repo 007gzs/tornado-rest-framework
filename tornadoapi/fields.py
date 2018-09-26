@@ -80,6 +80,18 @@ MISSING_ERROR_MESSAGE = (
 
 
 class Field(object):
+    """
+    参数基类
+
+    :param description: 名称
+    :param required: 是否必填
+    :param default: 默认值
+    :param help_text: 说明
+    :param raw_body: 是否从POST BODY 原始数据获取
+    :param error_messages: 错误信息
+    :param validators: 检查器
+    :param allow_null: 是否允许为None
+    """
     default_error_messages = {
         'required': '该参数必填',  # 'This field is required.',
         'null': '该参数不能为null',  # 'This field may not be null.'
@@ -222,6 +234,18 @@ class Field(object):
 
 
 class BooleanField(Field):
+    """
+    布尔基类
+
+    :param description: 名称
+    :param required: 是否必填
+    :param default: 默认值
+    :param help_text: 说明
+    :param raw_body: 是否从POST BODY 原始数据获取
+    :param error_messages: 错误信息
+    :param validators: 检查器
+    :param allow_null: 是否允许为None
+    """
     default_error_messages = {
         'invalid': '"{input}" 不是有效的布尔值'  # '"{input}" is not a valid boolean.'
     }
@@ -245,6 +269,9 @@ class BooleanField(Field):
     }
     NULL_VALUES = {'n', 'N', 'null', 'Null', 'NULL', '', None}
 
+    def __init__(self, *args, **kwargs):
+        super(BooleanField, self).__init__(*args, **kwargs)
+
     def to_python(self, data):
         try:
             if data in self.TRUE_VALUES:
@@ -259,6 +286,22 @@ class BooleanField(Field):
 
 
 class CharField(Field):
+    """
+    字符串参数
+
+    :param allow_blank: 是否允许为空串
+    :param trim_whitespace: 是否清空首尾空格
+    :param max_length: 最大长度
+    :param min_length: 最小长度
+    :param description: 名称
+    :param required: 是否必填
+    :param default: 默认值
+    :param help_text: 说明
+    :param raw_body: 是否从POST BODY 原始数据获取
+    :param error_messages: 错误信息
+    :param validators: 检查器
+    :param allow_null: 是否允许为None
+    """
     default_error_messages = {
         'invalid': '不是有效的字符串',  # 'Not a valid string.',
         'blank': '该参数不能为空',  # 'This field may not be blank.',
@@ -303,7 +346,20 @@ class CharField(Field):
 
 
 class SplitCharField(CharField):
+    """
+    分割字符串参数
 
+    :param sep: 分割标识
+    :param field: 被分割后数据类型
+    :param description: 名称
+    :param required: 是否必填
+    :param default: 默认值
+    :param help_text: 说明
+    :param raw_body: 是否从POST BODY 原始数据获取
+    :param error_messages: 错误信息
+    :param validators: 检查器
+    :param allow_null: 是否允许为None
+    """
     default_field = CharField(allow_blank=True)
 
     def __init__(self, *args, **kwargs):
@@ -324,6 +380,20 @@ class SplitCharField(CharField):
 
 
 class NumberField(Field):
+    """
+    数字类型参数
+
+    :param max_value: 最大值
+    :param min_value: 最小值
+    :param description: 名称
+    :param required: 是否必填
+    :param default: 默认值
+    :param help_text: 说明
+    :param raw_body: 是否从POST BODY 原始数据获取
+    :param error_messages: 错误信息
+    :param validators: 检查器
+    :param allow_null: 是否允许为None
+    """
     default_error_messages = {
         'invalid': '该参数不是有效数字',  # 'A valid integer is required.',
         'max_value': '该参数超过最大限制 {max_value}',  # 'Ensure this value is less than or equal to {max_value}.',
@@ -354,7 +424,24 @@ class NumberField(Field):
 
 
 class IntegerField(NumberField):
+    """
+    整型类型参数
+
+    :param max_value: 最大值
+    :param min_value: 最小值
+    :param description: 名称
+    :param required: 是否必填
+    :param default: 默认值
+    :param help_text: 说明
+    :param raw_body: 是否从POST BODY 原始数据获取
+    :param error_messages: 错误信息
+    :param validators: 检查器
+    :param allow_null: 是否允许为None
+    """
     re_decimal = re.compile(r'\.0*\s*$')  # allow e.g. '1.0' as an int, but not '1.2'
+
+    def __init__(self, *args, **kwargs):
+        super(IntegerField, self).__init__(*args, **kwargs)
 
     def to_python(self, data):
         if isinstance(data, six.text_type) and len(data) > self.MAX_STRING_LENGTH:
@@ -368,6 +455,22 @@ class IntegerField(NumberField):
 
 
 class FloatField(NumberField):
+    """
+    浮点类型参数
+
+    :param max_value: 最大值
+    :param min_value: 最小值
+    :param description: 名称
+    :param required: 是否必填
+    :param default: 默认值
+    :param help_text: 说明
+    :param raw_body: 是否从POST BODY 原始数据获取
+    :param error_messages: 错误信息
+    :param validators: 检查器
+    :param allow_null: 是否允许为None
+    """
+    def __init__(self, *args, **kwargs):
+        super(FloatField, self).__init__(*args, **kwargs)
 
     def to_python(self, data):
 
@@ -381,6 +484,23 @@ class FloatField(NumberField):
 
 
 class DecimalField(NumberField):
+    """
+    Decimal类型参数
+
+    :param max_digits: 整数位处长度限制
+    :param decimal_places: 小数位数长度限制
+    :param rounding: 截取方式
+    :param max_value: 最大值
+    :param min_value: 最小值
+    :param description: 名称
+    :param required: 是否必填
+    :param default: 默认值
+    :param help_text: 说明
+    :param raw_body: 是否从POST BODY 原始数据获取
+    :param error_messages: 错误信息
+    :param validators: 检查器
+    :param allow_null: 是否允许为None
+    """
     default_error_messages = {
         'invalid': '该参数不是有效数字',  # 'A valid number is required.',
         'max_value': '该参数超过最大限制 {max_value}',  # 'Ensure this value is less than or equal to {max_value}.',
@@ -393,15 +513,9 @@ class DecimalField(NumberField):
         'max_string_length': '该参数长度过长',  # 'String value too large.'
     }
 
-    def __init__(self, max_digits, decimal_places, coerce_to_string=None, max_value=None, min_value=None,
-                 rounding=None, *args, **kwargs):
+    def __init__(self, max_digits, decimal_places, rounding=None, *args, **kwargs):
         self.max_digits = max_digits
         self.decimal_places = decimal_places
-        if coerce_to_string is not None:
-            self.coerce_to_string = coerce_to_string
-
-        self.max_value = max_value
-        self.min_value = min_value
 
         if self.max_digits is not None and self.decimal_places is not None:
             self.max_whole_digits = self.max_digits - self.decimal_places
@@ -496,6 +610,19 @@ class DecimalField(NumberField):
 
 
 class DateTimeField(Field):
+    """
+    时间日期类型参数
+
+    :param input_formats: 时间日期格式 默认为 settings.DATETIME_INPUT_FORMATS
+    :param description: 名称
+    :param required: 是否必填
+    :param default: 默认值
+    :param help_text: 说明
+    :param raw_body: 是否从POST BODY 原始数据获取
+    :param error_messages: 错误信息
+    :param validators: 检查器
+    :param allow_null: 是否允许为None
+    """
     default_error_messages = {
         'invalid': '时间格式错误，请使用 {format}',  # 'Datetime has wrong format. Use one of these formats instead: {format}.',
         'date': 'Expected a datetime but got a date.',
@@ -504,9 +631,7 @@ class DateTimeField(Field):
     }
     datetime_parser = datetime.datetime.strptime
 
-    def __init__(self, format=empty, input_formats=None, *args, **kwargs):
-        if format is not empty:
-            self.format = format
+    def __init__(self, input_formats=None, *args, **kwargs):
         if input_formats is not None:
             self.input_formats = input_formats
         super(DateTimeField, self).__init__(*args, **kwargs)
@@ -534,17 +659,26 @@ class DateTimeField(Field):
 
 
 class DateField(DateTimeField):
+    """
+    日期类型参数
+
+    :param input_formats: 日期格式 默认为 settings.DATE_INPUT_FORMATS
+    :param description: 名称
+    :param required: 是否必填
+    :param default: 默认值
+    :param help_text: 说明
+    :param raw_body: 是否从POST BODY 原始数据获取
+    :param error_messages: 错误信息
+    :param validators: 检查器
+    :param allow_null: 是否允许为None
+    """
     default_error_messages = {
         'invalid': '日期格式错误，请使用 {format}',  # 'Date has wrong format. Use one of these formats instead: {format}.',
         'datetime': 'Expected a date but got a datetime.',
     }
     datetime_parser = datetime.datetime.strptime
 
-    def __init__(self, format=empty, input_formats=None, *args, **kwargs):
-        if format is not empty:
-            self.format = format
-        if input_formats is not None:
-            self.input_formats = input_formats
+    def __init__(self, *args, **kwargs):
         super(DateField, self).__init__(*args, **kwargs)
 
     def to_python(self, value):
@@ -560,16 +694,25 @@ class DateField(DateTimeField):
 
 
 class TimeField(DateTimeField):
+    """
+    时间类型参数
+
+    :param input_formats: 时间格式 默认为 settings.TIME_INPUT_FORMATS
+    :param description: 名称
+    :param required: 是否必填
+    :param default: 默认值
+    :param help_text: 说明
+    :param raw_body: 是否从POST BODY 原始数据获取
+    :param error_messages: 错误信息
+    :param validators: 检查器
+    :param allow_null: 是否允许为None
+    """
     default_error_messages = {
         'invalid': '时间格式错误，请使用 {format}',  # 'Time has wrong format. Use one of these formats instead: {format}.',
     }
     datetime_parser = datetime.datetime.strptime
 
-    def __init__(self, format=empty, input_formats=None, *args, **kwargs):
-        if format is not empty:
-            self.format = format
-        if input_formats is not None:
-            self.input_formats = input_formats
+    def __init__(self, *args, **kwargs):
         super(TimeField, self).__init__(*args, **kwargs)
 
     def to_python(self, value):
@@ -581,16 +724,25 @@ class TimeField(DateTimeField):
 
 
 class ChoiceField(Field):
+    """
+    选择类型参数
+
+    :param choices: 选项列表 支持格式： [1],  [(1, '1st'), (2, '2nd')], [('Group', ((1, '1st'), 2))]
+    :param description: 名称
+    :param required: 是否必填
+    :param default: 默认值
+    :param help_text: 说明
+    :param raw_body: 是否从POST BODY 原始数据获取
+    :param error_messages: 错误信息
+    :param validators: 检查器
+    :param allow_null: 是否允许为None
+    """
     default_error_messages = {
         'invalid_choice': '"{input}" 不在可选列表中'  # '"{input}" is not a valid choice.'
     }
-    html_cutoff = None
-    html_cutoff_text = 'More than {count} items...'
 
     def __init__(self, choices, *args, **kwargs):
         self.choices = choices
-        self.html_cutoff = kwargs.pop('html_cutoff', self.html_cutoff)
-        self.html_cutoff_text = kwargs.pop('html_cutoff_text', self.html_cutoff_text)
 
         self.allow_blank = kwargs.pop('allow_blank', False)
 
