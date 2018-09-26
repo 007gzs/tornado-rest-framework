@@ -37,7 +37,7 @@ ApiHandler调用示例::
 
     from tornadoapi.handler import ApiHandler
 
-    class TestHandler(BaseHandler):
+    class TestHandler(ApiHandler):
         test_param = fields.CharField(description='测试参数', default=None)
         test_choice = fields.ChoiceField(description='选择参数', default=None, choices=((0, '选项0'), (1, '选项1')))
 
