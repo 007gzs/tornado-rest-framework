@@ -105,8 +105,14 @@ class ApiHandler(BaseHandler):
     EXCEPTION_STATUS_CODE = 500
 
     @classmethod
+    def tonadoapi_get_class_name(cls):
+        return '{}.{}'.format(cls.__module__, cls.__name__)
+
+    @classmethod
     def tonadoapi_field_info(cls):
-        if hasattr(cls, '__tonadoapi_field_info'):
+        if hasattr(cls, '__tonadoapi_field_info') \
+                and hasattr(cls, '__tonadoapi_class_name') \
+                and cls.tonadoapi_get_class_name() == getattr(cls, '__tonadoapi_class_name'):
             return getattr(cls, '__tonadoapi_field_info')
         field_info = OrderedDict()
         for field_name in dir(cls):
@@ -115,6 +121,7 @@ class ApiHandler(BaseHandler):
                 continue
             field_info[field_name] = field.get_field_info()
         setattr(cls, '__tonadoapi_field_info', field_info)
+        setattr(cls, '__tonadoapi_field_info', cls.tonadoapi_get_class_name())
         return field_info
 
     def tonadoapi_prepare(self):
@@ -421,7 +428,7 @@ li {margin:5px 50px}
             if not issubclass(rule.target, ApiHandler):
                 continue
             data = {
-                'class_name': '{}.{}'.format(rule.target.__module__, rule.target.__name__),
+                'class_name': rule.target.tonadoapi_get_class_name(),
                 'name': rule.name or rule.target.get_handler_name(),
                 'path': rule.matcher.regex.pattern[:-1] if isinstance(rule.matcher, PathMatches) else str(rule.matcher),
                 'support_methods': rule.target.support_methods(),
