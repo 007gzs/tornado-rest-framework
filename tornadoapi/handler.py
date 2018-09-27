@@ -165,6 +165,17 @@ class ApiHandler(BaseHandler):
         field_info_html = get_field_info_table_html(field_info)
         if field_info_html:
             field_info_html = "<span class='title'>参数列表</span>" + field_info_html
+        return_sample = self.get_return_sample()
+        return_sample_html = ''
+        if return_sample:
+            ret_sample_data = json.dumps(return_sample, ensure_ascii=False, indent=4)
+            return_sample_html = """
+    <div class='api panel'>
+    <span class='title'>返回格式说明</span>
+    <div class="panel res_data bg">
+    <pre>{ret_sample_data}</pre>
+    </div>
+""".format(ret_sample_data=ret_sample_data)
         style = """
 <style>
 body{ margin: 0; padding: 0; font-size:16px}
@@ -208,6 +219,7 @@ pre {padding: 10px}
 {res_data}
 </pre>
 </div>
+{return_sample_html}
 </div>
 </body>
 </heml>
@@ -218,6 +230,7 @@ pre {padding: 10px}
             style=style,
             url=self.request.uri,
             method=self.request.method,
+            return_sample_html=return_sample_html,
             support_methods=' '.join(self.support_methods()))
         return html
 
@@ -297,7 +310,10 @@ class ApiDocHandler(BaseHandler):
             errcode_html += "{tag} = {code}; // {message} \n".format(
                 tag=code_data.tag, code=code_data.code, message=code_data.message)
         content = ""
+        menu = ""
+        index = 0
         for api in api_list:
+            index += 1
             field_info_html = get_field_info_table_html(api['field_info'])
             if field_info_html:
                 field_info_html = "<span class='title'>参数列表</span>" + field_info_html
@@ -305,14 +321,16 @@ class ApiDocHandler(BaseHandler):
             if api['return_sample']:
                 ret_sample_data = json.dumps(api['return_sample'], ensure_ascii=False, indent=4)
                 return_sample = """
-<div class='api panel '>
-<span class='title'>返回格式</span>
+<div class='api panel'>
+<span class='title'>返回格式说明</span>
 <div class="panel res_data bg">
 <pre>{ret_sample_data}</pre>
 </div>
 """.format(ret_sample_data=ret_sample_data)
+            menu += "<li><a href='#api_{index}'>{name}</a></li>\n".format(name=api['name'], index=index)
             content += """
 <div class='api panel'>
+<a name='api_{index}'></a>
 <h3>{name}</h3>
 <span class='title'>请求地址</span>
 <div class="panel bg">
@@ -330,13 +348,18 @@ class ApiDocHandler(BaseHandler):
                 name=api['name'],
                 support_methods=' '.join(api['support_methods']),
                 field_info_html=field_info_html,
-                return_sample=return_sample
+                return_sample=return_sample,
+                index=index
             )
         style = """
 <style>
 body{ margin: 0; padding: 0; font-size:16px}
 body,html{-webkit-text-size-adjust: none;width: 100%;height: 100%;}
 *{text-decoration: none;list-style: none;}
+a:link {color: #000; text-decoration: none;}
+a:visited {text-decoration: none; color: #000;}
+a:hover {text-decoration: underline;color: #000;}
+a:active {text-decoration: none;}
 img{border: 0px;}
 table,table tr th, table tr td { border:1px solid #000000; }
 table{background: #cccccc; min-height: 25px; line-height: 25px; text-align: center; border-collapse: collapse;}
@@ -347,6 +370,7 @@ div.api {clear: both; margin-bottom:50px}
 pre {padding: 10px}
 .bg { background: #cccccc; margin: 0; border-radius: 10px }
 .panel { width: 100%; margin-bottom:5px}
+li {margin:5px 50px}
 </style>
 """
         ret_sample = {'code': '错误码', 'message': '错误描述', 'data': '数据'}
@@ -360,6 +384,7 @@ pre {padding: 10px}
 </head>
 <body>
 <div id="content">
+    <a name='api_0'></a>
     <div class='api panel'>
         <span class='title'>错误码</span>
         <div class="panel bg">
@@ -372,11 +397,17 @@ pre {padding: 10px}
         <pre>{ret_sample_data}</pre>
         </div>
     </div>
+    <div class='api panel'>
+        <span class='title'>接口列表</span>
+        <div class="panel">
+        {menu}
+        </div>
+    </div>
     {content}
 </div>
 </body>
 </html>
-""".format(style=style, content=content, errcode=errcode_html, ret_sample_data=ret_sample_data)
+""".format(style=style, content=content, errcode=errcode_html, ret_sample_data=ret_sample_data, menu=menu)
         return html
 
     def get(self, *args, **kwargs):
