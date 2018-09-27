@@ -101,6 +101,8 @@ API_FORMAT_PREVIEW = 'preview'
 
 
 class ApiHandler(BaseHandler):
+    CUSTOM_ERROR_STATUS_CODE = 400
+    EXCEPTION_STATUS_CODE = 500
 
     @classmethod
     def tonadoapi_field_info(cls):
@@ -284,12 +286,15 @@ pre {padding: 10px}
                     status_code = 200
                 if isinstance(exc_info[1], CustomError):
                     kwargs['__api_data'] = exc_info[1]
+                    status_code = self.CUSTOM_ERROR_STATUS_CODE
                 else:
                     kwargs['__api_data'] = ErrCode.ERR_SYS_ERROR
                     kwargs['__api_exc_info'] = exc_info
+                    status_code = self.EXCEPTION_STATUS_CODE
         super(ApiHandler, self).send_error(status_code, **kwargs)
 
     def write_error(self, status_code, **kwargs):
+        self.set_status(status_code)
         if '__api_data' in kwargs and isinstance(kwargs['__api_data'], (CustomError, CodeData)):
             self.write_api(kwargs['__api_data'], True, exc_info=kwargs.get('__api_exc_info'))
         else:
