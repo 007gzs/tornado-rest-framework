@@ -1,7 +1,7 @@
 Changelog
 ================
 
-Version 1.0.3
+Version 1.0.4
 ------------------
 
 + CACHE 增加 mget

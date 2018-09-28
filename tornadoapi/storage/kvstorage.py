@@ -25,7 +25,8 @@ class KvStorage(BaseStorage):
         if not hasattr(self.kvdb, 'mget'):
             return super(KvStorage, self).mget(keys)
         key_names = [self.key_name(key) for key in keys]
-        return self.kvdb.mget(key_names)
+        ret = self.kvdb.mget(key_names)
+        return [json.loads(to_text(value)) if value is not None else None for value in ret]
 
     def get(self, key, default=None):
         key = self.key_name(key)
