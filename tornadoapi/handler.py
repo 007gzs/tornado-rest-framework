@@ -57,6 +57,12 @@ class BaseHandler(web.RequestHandler):
     def data_received(self, chunk):
         pass
 
+    def write_error(self, status_code, **kwargs):
+        if self.settings.get("serve_traceback") and "exc_info" in kwargs:
+            if isinstance(kwargs['exc_info'][1], HTTPError):
+                kwargs.pop('exc_info')
+        super(BaseHandler, self).write_error(status_code, **kwargs)
+
     def head(self, *args, **kwargs):
         return self.get(*args, **kwargs)
 
