@@ -9,6 +9,7 @@ import string
 import six
 
 logger = logging.getLogger('tornadoapi')
+logger_handler = logging.getLogger('tornadoapi.handler')
 
 
 class ObjectDict(dict):

@@ -1,9 +1,11 @@
 快速开始
 ==========
 
-启动之前或启动脚本开始时配置环境变量::
+启动之前或启动脚本开始时配置环境变量 并执行setup初始化::
 
     os.environ.setdefault("TORNADOAPI_SETTINGS_MODULE", "config.settings")
+    import tornadoapi
+    tornadoapi.setup()
 
 config/settings.py 中增加自定义配置::
 

@@ -1,0 +1,131 @@
+# encoding: utf-8
+from __future__ import absolute_import, unicode_literals
+
+import os
+import sys
+from importlib import import_module
+
+import six
+
+
+def import_string(dotted_path):
+    """
+    Import a dotted module path and return the attribute/class designated by the
+    last name in the path. Raise ImportError if the import failed.
+    """
+    try:
+        module_path, class_name = dotted_path.rsplit('.', 1)
+    except ValueError:
+        msg = "%s doesn't look like a module path" % dotted_path
+        raise ImportError(msg)
+
+    module = import_module(module_path)
+
+    try:
+        return getattr(module, class_name)
+    except AttributeError:
+        msg = 'Module "%s" does not define a "%s" attribute/class' % (
+            module_path, class_name)
+        six.reraise(ImportError, ImportError(msg), sys.exc_info()[2])
+
+
+if six.PY3:
+    from importlib.util import find_spec as importlib_find
+
+    def module_has_submodule(package, module_name):
+        """See if 'module' is in 'package'."""
+        try:
+            package_name = package.__name__
+            package_path = package.__path__
+        except AttributeError:
+            # package isn't a package.
+            return False
+
+        full_module_name = package_name + '.' + module_name
+        return importlib_find(full_module_name, package_path) is not None
+
+else:
+    import imp
+
+    def module_has_submodule(package, module_name):
+        """See if 'module' is in 'package'."""
+        name = ".".join([package.__name__, module_name])
+        try:
+            # None indicates a cached miss; see mark_miss() in Python/import.c.
+            return sys.modules[name] is not None
+        except KeyError:
+            pass
+        try:
+            package_path = package.__path__   # No __path__, then not a package.
+        except AttributeError:
+            # Since the remainder of this function assumes that we're dealing with
+            # a package (module with a __path__), so if it's not, then bail here.
+            return False
+        for finder in sys.meta_path:
+            if finder.find_module(name, package_path):
+                return True
+        for entry in package_path:
+            try:
+                # Try the cached finder.
+                finder = sys.path_importer_cache[entry]
+                if finder is None:
+                    # Implicit import machinery should be used.
+                    try:
+                        file_, _, _ = imp.find_module(module_name, [entry])
+                        if file_:
+                            file_.close()
+                        return True
+                    except ImportError:
+                        continue
+                # Else see if the finder knows of a loader.
+                elif finder.find_module(name):
+                    return True
+                else:
+                    continue
+            except KeyError:
+                # No cached finder, so try and make one.
+                for hook in sys.path_hooks:
+                    try:
+                        finder = hook(entry)
+                        # XXX Could cache in sys.path_importer_cache
+                        if finder.find_module(name):
+                            return True
+                        else:
+                            # Once a finder is found, stop the search.
+                            break
+                    except ImportError:
+                        # Continue the search for a finder.
+                        continue
+                else:
+                    # No finder found.
+                    # Try the implicit import machinery if searching a directory.
+                    if os.path.isdir(entry):
+                        try:
+                            file_, _, _ = imp.find_module(module_name, [entry])
+                            if file_:
+                                file_.close()
+                            return True
+                        except ImportError:
+                            pass
+                    # XXX Could insert None or NullImporter
+        else:
+            # Exhausted the search, so the module cannot be found.
+            return False
+
+
+def module_dir(module):
+    """
+    Find the name of the directory that contains a module, if possible.
+
+    Raise ValueError otherwise, e.g. for namespace packages that are split
+    over several directories.
+    """
+    # Convert to list because _NamespacePath does not support indexing on 3.3.
+    paths = list(getattr(module, '__path__', []))
+    if len(paths) == 1:
+        return paths[0]
+    else:
+        filename = getattr(module, '__file__', None)
+        if filename is not None:
+            return os.path.dirname(filename)
+    raise ValueError("Cannot determine directory containing %s" % module)

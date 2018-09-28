@@ -2,21 +2,18 @@
 from __future__ import absolute_import, unicode_literals
 
 import json
-import logging
 from collections import OrderedDict
 
 import six
 from tornado import web
 from tornado.routing import PathMatches
 from tornado.web import HTTPError
-from tornadoapi.core import escape
+from tornadoapi.core import escape, logger_handler
 
 from tornadoapi.core.code import CodeData
 from tornadoapi.core.err_code import ErrCode
 from tornadoapi.core.exceptions import CustomError, ValidationError
 from tornadoapi.fields import Field, empty
-
-handler_log = logging.getLogger("tornadoapi.handler")
 
 
 def get_field_info_table_html(field_info):
@@ -92,7 +89,7 @@ class BaseHandler(web.RequestHandler):
 
     @property
     def log(self):
-        return handler_log
+        return logger_handler
 
 
 API_FORMAT_JSON = 'json'
@@ -149,7 +146,7 @@ class ApiHandler(BaseHandler):
 
     @classmethod
     def get_return_sample(cls):
-        return None
+        return ''
 
     def get_format(self, params_name="format"):
         _format = self.get_argument(params_name, None)
@@ -289,15 +286,14 @@ pre {padding: 10px}
                 self.log.error("ApiHandler exception in finished %s\n%r", self._request_summary(),
                                self.request, exc_info=exc_info)
             else:
-                if not isinstance(exc_info[1], HTTPError):
-                    status_code = 200
                 if isinstance(exc_info[1], CustomError):
                     kwargs['__api_data'] = exc_info[1]
                     status_code = self.CUSTOM_ERROR_STATUS_CODE
                 else:
                     kwargs['__api_data'] = ErrCode.ERR_SYS_ERROR
                     kwargs['__api_exc_info'] = exc_info
-                    status_code = self.EXCEPTION_STATUS_CODE
+                    if not isinstance(exc_info[1], HTTPError):
+                        status_code = self.EXCEPTION_STATUS_CODE
         super(ApiHandler, self).send_error(status_code, **kwargs)
 
     def write_error(self, status_code, **kwargs):
