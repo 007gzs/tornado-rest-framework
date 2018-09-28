@@ -275,7 +275,7 @@ pre {padding: 10px}
 {remark_html}
 </div>
 </body>
-</heml>
+</html>
 """.format(
             name=self.get_handler_name(),
             res_data=escape(res_data),
