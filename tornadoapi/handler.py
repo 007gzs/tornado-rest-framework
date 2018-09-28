@@ -204,11 +204,12 @@ class ApiHandler(BaseHandler):
         if return_sample:
             ret_sample_data = json.dumps(return_sample, ensure_ascii=False, indent=4)
             return_sample_html = """
-    <div class='api panel'>
-    <span class='title'>返回格式说明</span>
-    <div class="panel res_data bg">
-    <pre>{ret_sample_data}</pre>
-    </div>
+<div class='api panel'>
+<span class='title'>返回格式说明</span>
+<div class="panel res_data bg">
+<pre>{ret_sample_data}</pre>
+</div>
+</div>
 """.format(ret_sample_data=ret_sample_data)
         description = self.get_handler_description()
         if description:
@@ -218,6 +219,7 @@ class ApiHandler(BaseHandler):
 <div class="panel res_data bg">
 <pre>{description}</pre>
 </div>
+</div>
 """.format(description=description)
         remark = self.get_handler_remark()
         if remark:
@@ -226,6 +228,7 @@ class ApiHandler(BaseHandler):
 <span class='title'>备注</span>
 <div class="panel res_data bg">
 <pre>{remark}</pre>
+</div>
 </div>
 """.format(remark=remark)
         style = """
@@ -382,6 +385,7 @@ class ApiDocHandler(BaseHandler):
 <span class='title'>返回格式说明</span>
 <div class="panel res_data bg">
 <pre>{ret_sample_data}</pre>
+</div>
 </div>
 """.format(ret_sample_data=ret_sample_data)
             menu += "<li><a href='#api_{index}'>{name}</a></li>\n".format(name=api['name'], index=index)
