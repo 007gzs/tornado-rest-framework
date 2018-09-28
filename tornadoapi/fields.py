@@ -775,22 +775,27 @@ class ChoiceField(Field):
 
 
 class JSONField(Field):
+    """
+    选择类型参数
+
+    :param description: 名称
+    :param required: 是否必填
+    :param default: 默认值
+    :param help_text: 说明
+    :param raw_body: 是否从POST BODY 原始数据获取
+    :param error_messages: 错误信息
+    :param validators: 检查器
+    :param allow_null: 是否允许为None
+    """
     default_error_messages = {
         'invalid': '该参数不是有效 JSON'  # 'Value must be valid JSON.'
     }
 
     def __init__(self, *args, **kwargs):
-        self.binary = kwargs.pop('binary', False)
         super(JSONField, self).__init__(*args, **kwargs)
 
     def to_python(self, data):
         try:
-            if self.binary or getattr(data, 'is_json_string', False):
-                if isinstance(data, bytes):
-                    data = data.decode('utf-8')
-                return json.loads(data)
-            else:
-                json.dumps(data)
+            return json.loads(data)
         except (TypeError, ValueError):
             self.fail('invalid')
-        return data

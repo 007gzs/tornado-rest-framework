@@ -8,7 +8,7 @@ import six
 from tornado import web
 from tornado.routing import PathMatches
 from tornado.web import HTTPError
-from tornadoapi.core import escape, logger_handler
+from tornadoapi.core import escape, logger_handler, to_text
 
 from tornadoapi.core.code import CodeData
 from tornadoapi.core.err_code import ErrCode
@@ -49,7 +49,24 @@ class BaseHandler(web.RequestHandler):
 
     @classmethod
     def get_handler_name(cls):
+        """
+        重写返回接口名称
+        """
         return cls.__name__
+
+    @classmethod
+    def get_handler_description(cls):
+        """
+        重写返回接口描述
+        """
+        return ''
+
+    @classmethod
+    def get_handler_remark(cls):
+        """
+        重写返回接口备注
+        """
+        return ''
 
     def tonadoapi_prepare(self):
         self.__tonadoapi_prepare_user()
@@ -136,7 +153,10 @@ class ApiHandler(BaseHandler):
             if not isinstance(field, Field):
                 continue
             if field.raw_body:
-                data = self.request.body
+                if self.request.method.upper() in ('HEAD', 'GET', 'OPTIONS'):
+                    data = empty
+                else:
+                    data = to_text(self.request.body)
             else:
                 data = self.path_kwargs.get(field_name, self.get_argument(field_name, empty))
             try:
@@ -177,8 +197,10 @@ class ApiHandler(BaseHandler):
         field_info_html = get_field_info_table_html(field_info)
         if field_info_html:
             field_info_html = "<span class='title'>参数列表</span>" + field_info_html
-        return_sample = self.get_return_sample()
         return_sample_html = ''
+        description_html = ''
+        remark_html = ''
+        return_sample = self.get_return_sample()
         if return_sample:
             ret_sample_data = json.dumps(return_sample, ensure_ascii=False, indent=4)
             return_sample_html = """
@@ -188,6 +210,24 @@ class ApiHandler(BaseHandler):
     <pre>{ret_sample_data}</pre>
     </div>
 """.format(ret_sample_data=ret_sample_data)
+        description = self.get_handler_description()
+        if description:
+            description_html = """
+<div class='api panel'>
+<span class='title'>描述</span>
+<div class="panel res_data bg">
+<pre>{description}</pre>
+</div>
+""".format(description=description)
+        remark = self.get_handler_remark()
+        if remark:
+            remark_html = """
+<div class='api panel'>
+<span class='title'>备注</span>
+<div class="panel res_data bg">
+<pre>{remark}</pre>
+</div>
+""".format(remark=remark)
         style = """
 <style>
 body{ margin: 0; padding: 0; font-size:16px}
@@ -215,7 +255,7 @@ pre {padding: 10px}
 <body>
 <div id="content">
 <h3>{name}</h3>
-
+{description_html}
 <span class='title'>请求地址</span>
 <div class="panel bg">
 <pre>{method} {url}</pre>
@@ -232,6 +272,7 @@ pre {padding: 10px}
 </pre>
 </div>
 {return_sample_html}
+{remark_html}
 </div>
 </body>
 </heml>
@@ -243,6 +284,8 @@ pre {padding: 10px}
             url=self.request.uri,
             method=self.request.method,
             return_sample_html=return_sample_html,
+            description_html=description_html,
+            remark_html=remark_html,
             support_methods=' '.join(self.support_methods()))
         return html
 
