@@ -4,6 +4,9 @@ from __future__ import absolute_import, unicode_literals
 
 class BaseStorage(object):
 
+    def mget(self, keys=()):
+        return [self.get(key) for key in keys]
+
     def get(self, key, default=None):
         raise NotImplementedError()
 

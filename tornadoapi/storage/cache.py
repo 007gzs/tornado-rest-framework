@@ -25,6 +25,10 @@ class CacheItem(object):
             k = '{0}:{1}'.format(k, key)
         return k
 
+    def mget(self, keys=()):
+        key_names = [self.key_name(key) for key in keys]
+        return self.cache.storage.mget(key_names)
+
     def get(self, key=None, default=None):
         return self.cache.storage.get(self.key_name(key), default)
 

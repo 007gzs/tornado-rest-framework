@@ -1,6 +1,13 @@
 Changelog
 ================
 
+Version 1.0.3
+------------------
+
++ CACHE 增加 mget
++ HTTPError 不显示堆栈
++ 增加 tornadoapi.setup() 初始化LOGGING
+
 Version 1.0.2
 ------------------
 
