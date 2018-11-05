@@ -1,0 +1,82 @@
+<html>
+    <head>
+        <meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+        <title>{handler_name}</title>
+        <style>
+            body{ margin: 0; padding: 0; font-size:16px}
+            body,html{-webkit-text-size-adjust: none;width: 100%;height: 100%;}
+            *{text-decoration: none;list-style: none;}
+            img{border: 0px;}
+            table,table tr th, table tr td { border:1px solid #000000; }
+            table{background: #cccccc; min-height: 25px; line-height: 25px; text-align: center; border-collapse: collapse;}
+            .raw_body {font-style: italic;}
+            #content{ width: 90%; margin-left: 5%}
+            #res_data{ max-width: 100%; overflow-x: auto; }
+            .bg { background: #cccccc; margin: 0; border-radius: 10px }
+            pre {padding: 10px}
+            .panel { width: 100%; margin-bottom:10px}
+        </style>
+    </head>
+    <body>
+        <div id="content">
+            <h3>{{ handler_name }}</h3>
+            {% if description %}
+            <div class='api panel'>
+                <span class='title'>描述</span>
+                <div class="panel res_data bg">
+                    <pre>{{ description }}</pre>
+                </div>
+            </div>
+            {% endif %}
+            <span class='title'>请求地址</span>
+            <div class="panel bg">
+            <pre>{{ method }} {{ url }}</pre>
+            </div>
+            <span class='title'>支持请求类型</span>
+            <div class="panel bg">
+            <pre>{{ support_methods | join(' ') }}</pre>
+            </div>
+            {% if field_info %}
+            <span class='title'>参数列表</span>
+            <table class="params panel">
+                <tr><th>参数</th><th>名称</th><th>类型</th><th>是否必填</th><th>默认值</th><th>说明</th><th>限制</th></tr>
+                {% for name, info in field_info.items() %}
+                <tr>
+                    <td class='{% if info.raw_body %}raw_body{% endif %} {% if info.required %}required{% endif %}'>
+                        {% if info.required %}
+                            *{{ name }}*
+                        {% else %}
+                            [{{ name }}]
+                        {% endif %}
+                    </td>
+                    {% for key in ('description', 'type', 'required', 'default', 'help_text', 'ex_info') %}
+                    <td>{{ info.get(key, '') }}</td>
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+            </table>
+            {% endif %}
+            <span class='title'>返回结果</span>
+            <div id="res_data" class="panel bg">
+                <pre>{{ res_data | to_json(indent=4, ensure_ascii=False) }}</pre>
+            </div>
+            {% if return_sample %}
+            <div class='api panel'>
+                <span class='title'>返回格式说明</span>
+                <div class="panel res_data bg">
+                    <pre>{{ return_sample | to_json(indent=4, ensure_ascii=False) }}</pre>
+                </div>
+            </div>
+            {% endif %}
+
+            {% if remark %}
+            <div class='api panel'>
+                <span class='title'>备注</span>
+                <div class="panel res_data bg">
+                    <pre>{{ remark }}</pre>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </body>
+</html>

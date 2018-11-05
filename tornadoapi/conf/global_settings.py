@@ -75,7 +75,9 @@ DATETIME_INPUT_FORMATS = [
     '%m/%d/%y',              # '10/25/06'
 ]
 
-TEMPLATE_CONFIG = {}
+TEMPLATE_CONFIG = {
+    'cache_directory': '_template_cache'
+}
 
 # The callable to use to configure logging
 LOGGING_CONFIG = 'logging.config.dictConfig'

@@ -1,6 +1,12 @@
 Changelog
 ================
 
+Version 1.0.5
+------------------
+
++ 支持jinja2模板
++ doc apiview 使用jinja2模板
+
 Version 1.0.4
 ------------------
 

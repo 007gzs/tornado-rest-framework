@@ -67,6 +67,10 @@ def byte2int(c):
     return c
 
 
+def json_dumps(obj, indent=None, **kwargs):
+    return json.dumps(obj, indent=indent, **kwargs)
+
+
 def json_loads(s, object_hook=ObjectDict, **kwargs):
     return json.loads(s, object_hook=object_hook, **kwargs)
 
