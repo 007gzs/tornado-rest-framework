@@ -79,8 +79,56 @@ TEMPLATE_CONFIG = {
     'cache_directory': '_template_cache'
 }
 
+# response code and message tag
+RESPONSE_CODE_TAG = 'code'
+RESPONSE_MESSAGE_TAG = 'message'
+
 # The callable to use to configure logging
 LOGGING_CONFIG = 'logging.config.dictConfig'
 
 # Custom logging configuration.
 LOGGING = {}
+
+# People who get code error notifications.
+# In the format [('Full Name', 'email@example.com'), ('Full Name', 'anotheremail@example.com')]
+ADMINS = []
+
+# Not-necessarily-technical managers of the site. They get broken link
+# notifications and other various emails.
+MANAGERS = ADMINS
+
+# Default email address to use for various automated correspondence from
+# the site managers.
+DEFAULT_FROM_EMAIL = 'webmaster@localhost'
+
+# Subject-line prefix for email messages send with tornadoapi.core.mail.mail_admins
+# or ...mail_managers.  Make sure to include the trailing space.
+EMAIL_SUBJECT_PREFIX = '[Tornado Api]'
+
+# Email address that error messages come from.
+SERVER_EMAIL = None
+DEFAULT_CHARSET = 'utf-8'
+
+# The email backend to use. For possible shortcuts see django.core.mail.
+# The default is to use the SMTP backend.
+# Third-party backends can be specified by providing a Python path
+# to a module that defines an EmailBackend class.
+EMAIL_BACKEND = 'tornadoapi.core.mail.backends.smtp.EmailBackend'
+
+# Host for sending email.
+EMAIL_HOST = 'localhost'
+
+# Port for sending email.
+EMAIL_PORT = 25
+
+# Whether to send SMTP 'Date' header in the local time zone or in UTC.
+EMAIL_USE_LOCALTIME = False
+
+# Optional SMTP authentication information for EMAIL_HOST.
+EMAIL_HOST_USER = ''
+EMAIL_HOST_PASSWORD = ''
+EMAIL_USE_TLS = False
+EMAIL_USE_SSL = False
+EMAIL_SSL_CERTFILE = None
+EMAIL_SSL_KEYFILE = None
+EMAIL_TIMEOUT = None

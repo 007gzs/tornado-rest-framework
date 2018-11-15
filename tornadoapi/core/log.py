@@ -10,6 +10,11 @@ import logging.config  # needed when logging_config doesn't start with logging.c
 # HTTP 500 error. Depending on DEBUG, all other log records are either sent to
 # the console (DEBUG=True) or discarded (DEBUG=False) by means of the
 # require_debug_true filter.
+from copy import copy
+
+from tornadoapi.core import mail
+from tornadoapi.core.traceback import ExceptionReporter
+
 from tornadoapi.conf import settings
 from tornadoapi.core.module_loading import import_string
 
@@ -36,6 +41,11 @@ DEFAULT_LOGGING = {
             'class': 'logging.StreamHandler',
             'formatter': 'default',
         },
+        'mail_admins': {
+            'level': 'ERROR',
+            'filters': ['require_debug_false'],
+            'class': 'tornadoapi.core.log.AdminEmailHandler'
+        },
         'tornadoapi.handler': {
             'level': 'INFO',
             'class': 'logging.StreamHandler',
@@ -56,7 +66,7 @@ DEFAULT_LOGGING = {
             'level': 'INFO',
         },
         'tornadoapi': {
-            'handlers': ['console'],
+            'handlers': ['console', 'mail_admins'],
             'level': 'INFO',
         },
         'tornadoapi.handler': {
@@ -87,3 +97,46 @@ class RequireDebugFalse(logging.Filter):
 class RequireDebugTrue(logging.Filter):
     def filter(self, record):
         return settings.DEBUG
+
+
+class AdminEmailHandler(logging.Handler):
+    """An exception log handler that emails log entries to site admins.
+    If the request is passed as the first argument to the log record,
+    request data will be provided in the email report.
+    """
+
+    def __init__(self, include_html=True):
+        super().__init__()
+        self.include_html = include_html
+
+    def emit(self, record):
+        subject = '%s: %s' % (
+            record.levelname,
+            record.getMessage()
+        )
+        subject = self.format_subject(subject)
+
+        # Since we add a nicely formatted traceback on our own, create a copy
+        # of the log record without the exception data.
+        no_exc_record = copy(record)
+        no_exc_record.exc_info = None
+        no_exc_record.exc_text = None
+
+        if record.exc_info:
+            exc_info = record.exc_info
+        else:
+            exc_info = (None, record.getMessage(), None)
+
+        reporter = ExceptionReporter(record.handler, *exc_info, is_email=True)
+        message = "%s\n\n%s" % (self.format(no_exc_record), reporter.get_traceback_text())
+        html_message = reporter.get_traceback_html() if self.include_html else None
+        self.send_mail(subject, message, fail_silently=True, html_message=html_message)
+
+    def send_mail(self, subject, message, *args, **kwargs):
+        mail.mail_admins(subject, message, *args, **kwargs)
+
+    def format_subject(self, subject):
+        """
+        Escape CR and LF characters.
+        """
+        return subject.replace('\n', '\\n').replace('\r', '\\r')

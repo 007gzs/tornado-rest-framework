@@ -1,6 +1,11 @@
 # encoding: utf-8
 from __future__ import absolute_import, unicode_literals
 
+import six
+
+from tornadoapi.conf import settings
+from tornadoapi.core import to_text
+
 
 class CodeData(object):
 
@@ -22,9 +27,15 @@ class CodeData(object):
 
     def get_res_dict(self, **kwargs):
         ret = dict(kwargs)
-        ret['code'] = self.code
-        if 'message' not in ret:
-            ret['message'] = self.message
+        code_tag = 'code'
+        message_tag = 'message'
+        if settings.RESPONSE_CODE_TAG and isinstance(settings.RESPONSE_CODE_TAG, six.string_types):
+            code_tag = to_text(settings.RESPONSE_CODE_TAG)
+        if settings.RESPONSE_MESSAGE_TAG and isinstance(settings.RESPONSE_MESSAGE_TAG, six.string_types):
+            message_tag = to_text(settings.RESPONSE_MESSAGE_TAG)
+        ret[code_tag] = self.code
+        if message_tag not in ret:
+            ret[message_tag] = self.message
         return ret
 
 

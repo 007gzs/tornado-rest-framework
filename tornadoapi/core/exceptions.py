@@ -11,9 +11,10 @@ class CustomError(ValueError):
     """
     客户操作错误，用于在系统流程设计不完善时，处理客户无意提交的错误请求
     """
-    def __init__(self, errcode=ErrCode.ERR_COMMON_BAD_PARAM, **kwargs):
+    def __init__(self, errcode=ErrCode.ERR_COMMON_BAD_PARAM, status_code=None, **kwargs):
         self.code = errcode
         self.kwargs = kwargs
+        self.status_code = status_code
         self.message = self.kwargs.get('message', errcode.message)
         super(CustomError, self).__init__(self.message)
 

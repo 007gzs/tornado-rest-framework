@@ -5,6 +5,7 @@ import json
 import logging
 import random
 import string
+from pprint import pformat
 
 import six
 
@@ -108,3 +109,17 @@ def escape(s, quote=True):
         s = s.replace('"', "&quot;")
         s = s.replace('\'', "&#x27;")
     return s
+
+
+def pprint(value):
+    """A wrapper around pprint.pprint -- for debugging, really."""
+    try:
+        return pformat(value)
+    except Exception as e:
+        return "Error in formatting: %s: %s" % (e.__class__.__name__, e)
+
+
+if six.PY3:
+    to_str = to_text
+else:
+    to_str = to_binary

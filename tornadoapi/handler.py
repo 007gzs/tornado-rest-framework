@@ -2,22 +2,21 @@
 from __future__ import absolute_import, unicode_literals
 
 import json
-import os
 from collections import OrderedDict
 
+import six
 from tornado import web
 from tornado.routing import PathMatches
 from tornado.web import HTTPError
-from tornadoapi.core import logger_handler, to_text
+from tornadoapi.core import logger_handler, to_text, logger
 
 from tornadoapi.core.code import CodeData
 from tornadoapi.core.err_code import ErrCode
 from tornadoapi.core.exceptions import CustomError, ValidationError
+from tornadoapi.core.traceback import ExceptionReporter
 from tornadoapi.fields import Field, empty
+from tornadoapi.template import get_resource_template_html
 from tornadoapi.template.jinja2_loader import Jinja2TemplateLoader
-
-
-RESOURCE_PATH = os.path.join(os.path.dirname(__file__), 'resource')
 
 
 class BaseHandler(web.RequestHandler):
@@ -26,26 +25,6 @@ class BaseHandler(web.RequestHandler):
         super(BaseHandler, self).__init__(*args, **kwargs)
         self.__tonadoapi_prepare_user = self.prepare
         self.prepare = self.tonadoapi_prepare
-
-    def render_string(self, template_name, **kwargs):
-        template_path = kwargs.pop('_tornadoapi_template_path', None)
-        _old_get_template_path = self.get_template_path
-        _old_create_template_loader = self.create_template_loader
-        if template_path is not None:
-
-            def _new_create_template_loader(_template_path):
-                return Jinja2TemplateLoader(_template_path)
-
-            def _new_get_template_path():
-                return template_path
-            self.get_template_path = _new_get_template_path
-            self.create_template_loader = _new_create_template_loader
-        try:
-            ret = super(BaseHandler, self).render_string(template_name, **kwargs)
-        finally:
-            self.get_template_path = _old_get_template_path
-            self.create_template_loader = _old_create_template_loader
-        return ret
 
     @classmethod
     def get_handler_name(cls):
@@ -74,10 +53,31 @@ class BaseHandler(web.RequestHandler):
     def data_received(self, chunk):
         pass
 
+    def mail_exc_info(self, exc_info):
+        logger.error(
+            'Internal Server Error: %s', self.request.uri,
+            exc_info=exc_info,
+            extra={'status_code': 500, 'handler': self},
+        )
+
     def write_error(self, status_code, **kwargs):
-        if self.settings.get("serve_traceback") and "exc_info" in kwargs:
+        if "exc_info" in kwargs:
             if isinstance(kwargs['exc_info'][1], HTTPError):
                 kwargs.pop('exc_info')
+            else:
+                if self.settings.get("serve_traceback"):
+                    is_html = self.request.headers.get('X-Requested-With') != 'XMLHttpRequest'
+                    reporter = ExceptionReporter(self, *kwargs['exc_info'])
+                    res_data = reporter.get_traceback_html() if is_html else reporter.get_traceback_text()
+                    if is_html:
+                        self.set_header("Content-Type", "text/html; charset=UTF-8")
+                    else:
+                        self.set_header("Content-Type", "text/plant; charset=UTF-8")
+                    self.finish(res_data)
+                    return
+                else:
+                    self.mail_exc_info(kwargs['exc_info'])
+
         super(BaseHandler, self).write_error(status_code, **kwargs)
 
     def head(self, *args, **kwargs):
@@ -210,12 +210,9 @@ class ApiHandler(BaseHandler):
         if fmt not in support_format and no_fail:
             fmt = API_FORMAT_JSON
         if fmt == API_FORMAT_PREVIEW and self.debug:
-            # html = self.get_preview_html(obj, self.tonadoapi_field_info())
-            # self.set_header("Content-Type", "text/html; charset=UTF-8")
-            # self.finish(html)
-            self.set_header("Content-Type", "text/html; charset=UTF-8")
-            self.render(
+            html = get_resource_template_html(
                 'apiview.html',
+                namespace=self.get_template_namespace(),
                 res_data=obj,
                 field_info=self.tonadoapi_field_info(),
                 handler_name=self.get_handler_name(),
@@ -224,9 +221,10 @@ class ApiHandler(BaseHandler):
                 return_sample=self.get_return_sample(),
                 description=self.get_handler_description(),
                 remark=self.get_handler_remark(),
-                support_methods=self.support_methods(),
-                _tornadoapi_template_path=RESOURCE_PATH
+                support_methods=self.support_methods()
             )
+            self.set_header("Content-Type", "text/html; charset=UTF-8")
+            self.finish(html)
         elif fmt == API_FORMAT_JSON:
             self.set_header("Content-Type", "application/json; charset=UTF-8")
             self.finish(json.dumps(obj))
@@ -256,18 +254,29 @@ class ApiHandler(BaseHandler):
             else:
                 if isinstance(exc_info[1], CustomError):
                     kwargs['__api_data'] = exc_info[1]
-                    status_code = self.CUSTOM_ERROR_STATUS_CODE
+                    status_code = exc_info[1].status_code
+                    if status_code is not None:
+                        if not isinstance(status_code, six.integer_types):
+                            status_code = to_text(status_code)
+                            if not status_code.isdigit():
+                                status_code = None
+                            else:
+                                status_code = int(status_code)
+
+                    if status_code is None or status_code <= 0 or status_code >= 1000:
+                        status_code = self.CUSTOM_ERROR_STATUS_CODE
                 else:
                     kwargs['__api_data'] = ErrCode.ERR_SYS_ERROR
                     kwargs['__api_exc_info'] = exc_info
                     if not isinstance(exc_info[1], HTTPError):
                         status_code = self.EXCEPTION_STATUS_CODE
+                        self.mail_exc_info(exc_info)
         super(ApiHandler, self).send_error(status_code, **kwargs)
 
     def write_error(self, status_code, **kwargs):
         self.set_status(status_code)
         if '__api_data' in kwargs and isinstance(kwargs['__api_data'], (CustomError, CodeData)):
-            self.write_api(kwargs['__api_data'], True, exc_info=kwargs.get('__api_exc_info'))
+            self.write_api(kwargs['__api_data'], True)
         else:
             super(ApiHandler, self).write_error(status_code, **kwargs)
 
@@ -294,11 +303,12 @@ class ApiDocHandler(BaseHandler):
             }
             api_list.append(data)
         ret_sample = {'code': '错误码', 'message': '错误描述', 'data': '数据'}
-        self.set_header("Content-Type", "text/html; charset=UTF-8")
-        self.render(
+        html = get_resource_template_html(
             'doc.html',
+            namespace=self.get_template_namespace(),
             err_codes=[getattr(ErrCode, tag) for tag in ErrCode.get_tags()],
             ret_sample_data=ret_sample,
             api_list=api_list,
-            _tornadoapi_template_path=RESOURCE_PATH
         )
+        self.set_header("Content-Type", "text/html; charset=UTF-8")
+        self.finish(html)
