@@ -106,7 +106,7 @@ DEFAULT_FROM_EMAIL = 'webmaster@localhost'
 EMAIL_SUBJECT_PREFIX = '[Tornado Api]'
 
 # Email address that error messages come from.
-SERVER_EMAIL = None
+SERVER_EMAIL = 'root@localhost'
 DEFAULT_CHARSET = 'utf-8'
 
 # The email backend to use. For possible shortcuts see django.core.mail.
