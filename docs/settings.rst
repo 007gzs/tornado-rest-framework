@@ -35,7 +35,8 @@ log配置
             'mail_admins': {
                 'level': 'ERROR',
                 'filters': ['require_debug_false'],
-                'class': 'tornadoapi.core.log.AdminEmailHandler'
+                'class': 'tornadoapi.core.log.AdminEmailHandler',
+                'include_html': True
             },
             'tornadoapi.handler': {
                 'level': 'INFO',
@@ -110,25 +111,28 @@ Jinja2 模板配置
 
     {
         'cache_directory': '_template_cache',  # 模版编译文件目录
+        'filters': {},
+        'test': {},
+        'globals': {},
         'autoescape': False,
-        'cache_size', 50,
-        'filesystem_checks', True,
-        'block_start_string', defaults.BLOCK_START_STRING,
-        'block_end_string', defaults.BLOCK_END_STRING,
-        'variable_start_string', defaults.VARIABLE_START_STRING,
-        'variable_end_string', defaults.VARIABLE_END_STRING,
-        'comment_start_string', defaults.COMMENT_START_STRING,
-        'comment_end_string', defaults.COMMENT_END_STRING,
-        'line_statement_prefix', defaults.LINE_STATEMENT_PREFIX,
-        'line_comment_prefix', defaults.LINE_COMMENT_PREFIX,
-        'trim_blocks', defaults.TRIM_BLOCKS,
-        'lstrip_blocks', defaults.LSTRIP_BLOCKS,
-        'newline_sequence', defaults.NEWLINE_SEQUENCE,
-        'keep_trailing_newline', defaults.KEEP_TRAILING_NEWLINE,
-        'extensions', (),
-        'optimized', True,
-        'undefined', Undefined,
-        'finalize', None
+        'cache_size': 50,
+        'filesystem_checks': True,
+        'block_start_string': defaults.BLOCK_START_STRING,
+        'block_end_string': defaults.BLOCK_END_STRING,
+        'variable_start_string': defaults.VARIABLE_START_STRING,
+        'variable_end_string': defaults.VARIABLE_END_STRING,
+        'comment_start_string': defaults.COMMENT_START_STRING,
+        'comment_end_string': defaults.COMMENT_END_STRING,
+        'line_statement_prefix': defaults.LINE_STATEMENT_PREFIX,
+        'line_comment_prefix': defaults.LINE_COMMENT_PREFIX,
+        'trim_blocks': defaults.TRIM_BLOCKS,
+        'lstrip_blocks': defaults.LSTRIP_BLOCKS,
+        'newline_sequence': defaults.NEWLINE_SEQUENCE,
+        'keep_trailing_newline': defaults.KEEP_TRAILING_NEWLINE,
+        'extensions': (),
+        'optimized': True,
+        'undefined': Undefined,
+        'finalize': None
     }
 
 

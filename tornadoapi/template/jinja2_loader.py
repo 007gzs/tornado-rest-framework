@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+import copy
 import json
 import os
 from jinja2 import Environment, FileSystemLoader, FileSystemBytecodeCache
@@ -34,13 +35,20 @@ _JINJA_ENV = Environment(bytecode_cache=_CACHE,
                          finalize=cfg.get('finalize', None))
 
 _JINJA_ENV.filters['to_json'] = json.dumps
+for key in ('filters', 'test', 'globals'):
+    cfg_data = cfg.get(key, {})
+    if cfg_data:
+        env_field = getattr(_JINJA_ENV, key)
+        for name, ftr in cfg_data.items():
+            env_field[name] = ftr
 
 
 class Jinja2TemplateLoader(Loader):
     def __init__(self, root_directory='', **kwargs):
         super(Jinja2TemplateLoader, self).__init__(root_directory, **kwargs)
         path = os.path.abspath(root_directory)
-        _JINJA_ENV.loader.searchpath = [path]
+        self._env = copy.deepcopy(_JINJA_ENV)
+        self._env.loader.searchpath = [path]
 
         cache_dir = os.path.abspath(settings.TEMPLATE_CONFIG.get('cache_directory'))
         if not os.path.exists(cache_dir):
@@ -51,13 +59,13 @@ class Jinja2TemplateLoader(Loader):
         with self.lock:
             if os.path.isabs(name):
                 path, file = os.path.split(name)
-                _JINJA_ENV.loader.searchpath = [path]
-                template = _JINJA_ENV.get_template(file)
+                self._env.loader.searchpath = [path]
+                template = self._env.get_template(file)
             else:
-                template = _JINJA_ENV.get_template(name)
+                template = self._env.get_template(name)
             template.generate = template.render
             return template
 
     def reset(self):
-        if hasattr(_JINJA_ENV, 'bytecode_cache') and _JINJA_ENV.bytecode_cache:
-            _JINJA_ENV.bytecode_cache.clear()
+        if hasattr(self._env, 'bytecode_cache') and self._env.bytecode_cache:
+            self._env.bytecode_cache.clear()

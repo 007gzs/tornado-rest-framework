@@ -44,7 +44,8 @@ DEFAULT_LOGGING = {
         'mail_admins': {
             'level': 'ERROR',
             'filters': ['require_debug_false'],
-            'class': 'tornadoapi.core.log.AdminEmailHandler'
+            'class': 'tornadoapi.core.log.AdminEmailHandler',
+            'include_html': True
         },
         'tornadoapi.handler': {
             'level': 'INFO',
@@ -105,8 +106,8 @@ class AdminEmailHandler(logging.Handler):
     request data will be provided in the email report.
     """
 
-    def __init__(self, include_html=True):
-        super().__init__()
+    def __init__(self, include_html=False):
+        super(AdminEmailHandler, self).__init__()
         self.include_html = include_html
 
     def emit(self, record):
