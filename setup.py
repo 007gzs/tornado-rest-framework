@@ -15,7 +15,11 @@ from os import path
 
 import ssl
 
-ssl._create_default_https_context = ssl._create_unverified_context
+try:
+    ssl._create_default_https_context = ssl._create_unverified_context
+except Exception:
+    pass
+
 
 here = path.abspath(path.dirname(__file__))
 
