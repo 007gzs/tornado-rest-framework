@@ -1,6 +1,7 @@
 # encoding: utf-8
 from __future__ import absolute_import, unicode_literals
 
+import copy
 import json
 from collections import OrderedDict
 
@@ -138,7 +139,7 @@ class ApiHandler(BaseHandler):
         if hasattr(cls, '__tonadoapi_field_info') \
                 and hasattr(cls, '__tonadoapi_class_name') \
                 and cls.tonadoapi_get_class_name() == getattr(cls, '__tonadoapi_class_name'):
-            return getattr(cls, '__tonadoapi_field_info')
+            return copy.deepcopy(getattr(cls, '__tonadoapi_field_info'))
         field_info = OrderedDict()
         for field_name in dir(cls):
             field = getattr(cls, field_name, None)
@@ -147,7 +148,7 @@ class ApiHandler(BaseHandler):
             field_info[field_name] = field.get_field_info()
         setattr(cls, '__tonadoapi_field_info', field_info)
         setattr(cls, '__tonadoapi_field_info', cls.tonadoapi_get_class_name())
-        return field_info
+        return copy.deepcopy(field_info)
 
     def tonadoapi_prepare(self):
         self.tonadoapi_field_info()
