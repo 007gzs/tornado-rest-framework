@@ -158,10 +158,6 @@ class ApiHandler(BaseHandler):
         self.tonadoapi_field_info()
         super(ApiHandler, self).tonadoapi_prepare()
         errors = {}
-        params = {
-            'uri': self.request.uri,
-            'method': self.request.method,
-        }
         for field_name in dir(self):
             field = getattr(self, field_name, None)
             if not isinstance(field, Field):
