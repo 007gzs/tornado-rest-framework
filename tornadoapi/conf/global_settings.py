@@ -82,6 +82,7 @@ TEMPLATE_CONFIG = {
 # response code and message tag
 RESPONSE_CODE_TAG = 'code'
 RESPONSE_MESSAGE_TAG = 'message'
+RESPONSE_DATA_TAG = 'data'
 
 # The callable to use to configure logging
 LOGGING_CONFIG = 'logging.config.dictConfig'

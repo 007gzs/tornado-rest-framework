@@ -25,14 +25,31 @@ class CodeData(object):
         else:
             return super(CodeData, self).__eq__(other)
 
-    def get_res_dict(self, **kwargs):
-        ret = dict(kwargs)
+    @classmethod
+    def get_code_tag(cls):
         code_tag = 'code'
-        message_tag = 'message'
         if settings.RESPONSE_CODE_TAG and isinstance(settings.RESPONSE_CODE_TAG, six.string_types):
             code_tag = to_text(settings.RESPONSE_CODE_TAG)
+        return code_tag
+
+    @classmethod
+    def get_message_tag(cls):
+        message_tag = 'message'
         if settings.RESPONSE_MESSAGE_TAG and isinstance(settings.RESPONSE_MESSAGE_TAG, six.string_types):
             message_tag = to_text(settings.RESPONSE_MESSAGE_TAG)
+        return message_tag
+
+    @classmethod
+    def get_data_tag(cls):
+        data_tag = 'data'
+        if settings.RESPONSE_DATA_TAG and isinstance(settings.RESPONSE_DATA_TAG, six.string_types):
+            data_tag = to_text(settings.RESPONSE_DATA_TAG)
+        return data_tag
+
+    def get_res_dict(self, **kwargs):
+        ret = dict(kwargs)
+        code_tag = self.get_code_tag()
+        message_tag = self.get_message_tag()
         ret[code_tag] = self.code
         if message_tag not in ret:
             ret[message_tag] = self.message

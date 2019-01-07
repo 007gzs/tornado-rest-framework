@@ -101,6 +101,22 @@ ApiHandler 返回值 message 对应 key
         "data": "数据"
     }
 
+RESPONSE_CODE_TAG
+------------------------------------------------------------------------
+默认值：`'data'`
+
+ApiHandler 返回值 data 对应 key
+
+::
+
+    RESPONSE_CODE_TAG = 'raw'
+    # ApiHandler 返回内容为
+    {
+        "code": "错误码",
+        "message": "错误描述",
+        "raw": "数据"
+    }
+
 TEMPLATE_CONFIG
 ------------------------------------------------------------------------
 默认值：`{'cache_directory': '_template_cache'}`

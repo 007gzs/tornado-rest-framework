@@ -116,9 +116,13 @@ class BaseHandler(web.RequestHandler):
         return logger_handler
 
 
-class Jinja2TemplateHandler(BaseHandler):
+class Jinja2TemplateMixin(object):
     def create_template_loader(self, template_path):
         return Jinja2TemplateLoader(template_path)
+
+
+class Jinja2TemplateHandler(Jinja2TemplateMixin, BaseHandler):
+    pass
 
 
 API_FORMAT_JSON = 'json'
@@ -154,6 +158,10 @@ class ApiHandler(BaseHandler):
         self.tonadoapi_field_info()
         super(ApiHandler, self).tonadoapi_prepare()
         errors = {}
+        params = {
+            'uri': self.request.uri,
+            'method': self.request.method,
+        }
         for field_name in dir(self):
             field = getattr(self, field_name, None)
             if not isinstance(field, Field):
@@ -174,7 +182,7 @@ class ApiHandler(BaseHandler):
             else:
                 setattr(self, field_name, value)
         if errors:
-            raise CustomError(ErrCode.ERR_COMMON_BAD_PARAM, data=errors)
+            raise CustomError(ErrCode.ERR_COMMON_BAD_PARAM, **{CodeData.get_data_tag(): errors})
 
     @classmethod
     def get_return_sample(cls):
@@ -200,8 +208,8 @@ class ApiHandler(BaseHandler):
     def write_api(self, obj, no_fail=False, fmt=None, **kwargs):
         if isinstance(obj, (CustomError, CodeData)):
             obj = obj.get_res_dict()
-        elif not isinstance(obj, dict) or 'code' not in obj:
-            obj = ErrCode.SUCCESS.get_res_dict(data=obj)
+        elif not isinstance(obj, dict) or CodeData.get_code_tag() not in obj:
+            obj = ErrCode.SUCCESS.get_res_dict(**{CodeData.get_data_tag(): obj})
         if not fmt:
             fmt = self.get_format()
         support_format = (API_FORMAT_JSON, API_FORMAT_JSONP, API_FORMAT_PREVIEW)
@@ -303,7 +311,11 @@ class ApiDocHandler(BaseHandler):
                 'return_sample': rule.target.get_return_sample()
             }
             api_list.append(data)
-        ret_sample = {'code': '错误码', 'message': '错误描述', 'data': '数据'}
+        ret_sample = {
+            CodeData.get_code_tag(): '错误码',
+            CodeData.get_message_tag(): '错误描述',
+            CodeData.get_data_tag(): '数据'
+        }
         html = get_resource_template_html(
             'doc.html',
             namespace=self.get_template_namespace(),
