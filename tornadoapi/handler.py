@@ -2,14 +2,13 @@
 from __future__ import absolute_import, unicode_literals
 
 import copy
-import json
 from collections import OrderedDict
 
 import six
 from tornado import web
 from tornado.routing import PathMatches
 from tornado.web import HTTPError
-from tornadoapi.core import logger_handler, to_text, logger
+from tornadoapi.core import logger_handler, to_text, logger, json_dumps
 
 from tornadoapi.core.code import CodeData
 from tornadoapi.core.err_code import ErrCode
@@ -232,11 +231,11 @@ class ApiHandler(BaseHandler):
             self.finish(html)
         elif fmt == API_FORMAT_JSON:
             self.set_header("Content-Type", "application/json; charset=UTF-8")
-            self.finish(json.dumps(obj))
+            self.finish(json_dumps(obj))
         elif fmt == API_FORMAT_JSONP:
             self.set_header("Content-Type", "application/javascript")
             callback = self.get_argument('callback', 'callback')
-            self.finish('%s(%s);' % (callback, json.dumps(obj)))
+            self.finish('%s(%s);' % (callback, json_dumps(obj)))
         else:
             self.log.error("format error %s" % fmt)
             raise CustomError(ErrCode.ERR_COMMON_BAD_PARAM)

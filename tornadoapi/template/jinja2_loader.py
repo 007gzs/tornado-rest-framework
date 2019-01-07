@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import copy
-import json
 import os
 from jinja2 import Environment, FileSystemLoader, FileSystemBytecodeCache
 from tornado.template import Loader
 from jinja2 import defaults
 from jinja2.runtime import Undefined
 from tornadoapi.conf import settings
+from tornadoapi.core import json_dumps
 
 _CACHE = FileSystemBytecodeCache()
 _LOADER = FileSystemLoader([])
@@ -34,7 +34,8 @@ _JINJA_ENV = Environment(bytecode_cache=_CACHE,
                          undefined=cfg.get('undefined', Undefined),
                          finalize=cfg.get('finalize', None))
 
-_JINJA_ENV.filters['to_json'] = json.dumps
+
+_JINJA_ENV.filters['to_json'] = json_dumps
 for key in ('filters', 'test', 'globals'):
     cfg_data = cfg.get(key, {})
     if cfg_data:

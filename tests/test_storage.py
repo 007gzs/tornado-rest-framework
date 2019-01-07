@@ -3,7 +3,7 @@ from __future__ import absolute_import, unicode_literals
 import unittest
 
 
-class WeChatSessionTestCase(unittest.TestCase):
+class StorageTestCase(unittest.TestCase):
 
     def test_caches(self, storage=None):
         if storage is None:

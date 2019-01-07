@@ -3,35 +3,28 @@ from __future__ import absolute_import, unicode_literals
 
 DEBUG = False
 # Default formatting for date objects. See all available format strings here:
-# http://docs.djangoproject.com/en/dev/ref/templates/builtins/#date
-DATE_FORMAT = 'N j, Y'
+DATE_FORMAT = '%Y-%m-%d'
 
 # Default formatting for datetime objects. See all available format strings here:
-# http://docs.djangoproject.com/en/dev/ref/templates/builtins/#date
-DATETIME_FORMAT = 'N j, Y, P'
+DATETIME_FORMAT = '%Y-%m-%d %H:%M:%S.%f'
 
 # Default formatting for time objects. See all available format strings here:
-# http://docs.djangoproject.com/en/dev/ref/templates/builtins/#date
-TIME_FORMAT = 'P'
+TIME_FORMAT = '%H:%M:%S'
 
 # Default formatting for date objects when only the year and month are relevant.
 # See all available format strings here:
-# http://docs.djangoproject.com/en/dev/ref/templates/builtins/#date
-YEAR_MONTH_FORMAT = 'F Y'
+YEAR_MONTH_FORMAT = '%Y-%m'
 
 # Default formatting for date objects when only the month and day are relevant.
 # See all available format strings here:
-# http://docs.djangoproject.com/en/dev/ref/templates/builtins/#date
-MONTH_DAY_FORMAT = 'F j'
+MONTH_DAY_FORMAT = '%m-%d'
 
 # Default short formatting for date objects. See all available format strings here:
-# http://docs.djangoproject.com/en/dev/ref/templates/builtins/#date
-SHORT_DATE_FORMAT = 'm/d/Y'
+SHORT_DATE_FORMAT = '%m/%d/%y'
 
 # Default short formatting for datetime objects.
 # See all available format strings here:
-# http://docs.djangoproject.com/en/dev/ref/templates/builtins/#date
-SHORT_DATETIME_FORMAT = 'm/d/Y P'
+SHORT_DATETIME_FORMAT = '%Y-%m-%d %H:%M:%S'
 
 # Default formats to be used when parsing dates from input boxes, in order
 # See all available format string here:

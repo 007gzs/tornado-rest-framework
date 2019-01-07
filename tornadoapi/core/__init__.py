@@ -1,10 +1,13 @@
 # encoding: utf-8
 from __future__ import absolute_import, unicode_literals
 
+import datetime
+import decimal
 import json
 import logging
 import random
 import string
+import uuid
 from pprint import pformat
 
 import six
@@ -68,8 +71,25 @@ def byte2int(c):
     return c
 
 
-def json_dumps(obj, indent=None, **kwargs):
-    return json.dumps(obj, indent=indent, **kwargs)
+class JSONEncoder(json.JSONEncoder):
+    def default(self, o):
+        from tornadoapi.conf import settings
+        if isinstance(o, datetime.datetime):
+            return o.strftime(settings.SHORT_DATETIME_FORMAT)
+        elif isinstance(o, datetime.date):
+            return o.strftime(settings.DATE_FORMAT)
+        elif isinstance(o, datetime.time):
+            return o.strftime(settings.TIME_FORMAT)
+        elif isinstance(o, decimal.Decimal):
+            return str(o)
+        elif isinstance(o, uuid.UUID):
+            return str(o)
+        else:
+            return super(JSONEncoder, self).default(o)
+
+
+def json_dumps(obj, indent=None, cls=JSONEncoder, **kwargs):
+    return json.dumps(obj, indent=indent, cls=cls, **kwargs)
 
 
 def json_loads(s, object_hook=ObjectDict, **kwargs):

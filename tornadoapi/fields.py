@@ -3,14 +3,13 @@ from __future__ import absolute_import, unicode_literals
 
 import datetime
 import decimal
-import json
 import re
 from collections import OrderedDict
 
 import six
 
 from tornadoapi.conf import settings as api_settings
-from tornadoapi.core import to_text
+from tornadoapi.core import to_text, json_loads
 from tornadoapi.core.exceptions import ValidationError
 from tornadoapi.validators import MaxLengthValidator, MinLengthValidator, MaxValueValidator, MinValueValidator
 
@@ -796,6 +795,6 @@ class JSONField(Field):
 
     def to_python(self, data):
         try:
-            return json.loads(data)
+            return json_loads(data)
         except (TypeError, ValueError):
             self.fail('invalid')
