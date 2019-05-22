@@ -13,6 +13,7 @@ import logging.config  # needed when logging_config doesn't start with logging.c
 from copy import copy
 
 from tornadoapi.core import mail
+from tornadoapi.core import to_text
 from tornadoapi.core.traceback import ExceptionReporter
 
 from tornadoapi.conf import settings
@@ -112,8 +113,8 @@ class AdminEmailHandler(logging.Handler):
 
     def emit(self, record):
         subject = '%s: %s' % (
-            record.levelname,
-            record.getMessage()
+            to_text(record.levelname),
+            to_text(record.getMessage())
         )
         subject = self.format_subject(subject)
 
