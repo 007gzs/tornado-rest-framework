@@ -130,7 +130,7 @@ class AdminEmailHandler(logging.Handler):
             exc_info = (None, record.getMessage(), None)
 
         reporter = ExceptionReporter(getattr(record, 'handler', None), *exc_info, is_email=True)
-        message = "%s\n\n%s" % (self.format(no_exc_record), reporter.get_traceback_text())
+        message = "%s\n\n%s" % (to_text(self.format(no_exc_record)), to_text(reporter.get_traceback_text()))
         html_message = reporter.get_traceback_html() if self.include_html else None
         self.send_mail(subject, message, fail_silently=True, html_message=html_message)
 
