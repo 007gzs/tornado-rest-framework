@@ -232,9 +232,33 @@ class Field(object):
         )
 
 
+class FileField(Field):
+    """
+    文件
+
+    :param description: 名称
+    :param required: 是否必填
+    :param default: 默认值
+    :param help_text: 说明
+    :param error_messages: 错误信息
+    :param validators: 检查器
+    :param allow_null: 是否允许为None
+    """
+    default_error_messages = {
+        'invalid': '"{input}" 不是有效的文件'  # '"{input}" is not a valid boolean.'
+    }
+
+    def to_python(self, data):
+        from tornado.httputil import HTTPFile
+        if isinstance(data, HTTPFile):
+            return data
+        else:
+            self.fail('invalid')
+
+
 class BooleanField(Field):
     """
-    布尔基类
+    布尔参数
 
     :param description: 名称
     :param required: 是否必填

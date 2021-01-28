@@ -14,7 +14,7 @@ from tornadoapi.core.code import CodeData
 from tornadoapi.core.err_code import ErrCode
 from tornadoapi.core.exceptions import CustomError, ValidationError
 from tornadoapi.core.traceback import ExceptionReporter
-from tornadoapi.fields import Field, empty
+from tornadoapi.fields import Field, empty, FileField
 from tornadoapi.template import get_resource_template_html
 from tornadoapi.template.jinja2_loader import Jinja2TemplateLoader
 
@@ -153,6 +153,12 @@ class ApiHandler(BaseHandler):
         setattr(cls, '__tonadoapi_field_info', cls.tonadoapi_get_class_name())
         return copy.deepcopy(field_info)
 
+    def get_file_argument(self, name, default=None):
+        files = self.request.files.get(name)
+        if not files:
+            return default
+        return files[-1]
+
     def tonadoapi_prepare(self):
         self.tonadoapi_field_info()
         super(ApiHandler, self).tonadoapi_prepare()
@@ -161,7 +167,9 @@ class ApiHandler(BaseHandler):
             field = getattr(self, field_name, None)
             if not isinstance(field, Field):
                 continue
-            if field.raw_body:
+            if isinstance(field, FileField):
+                data = self.get_file_argument(field_name, empty)
+            elif field.raw_body:
                 if self.request.method.upper() in ('HEAD', 'GET', 'OPTIONS'):
                     data = empty
                 else:
